@@ -1,0 +1,325 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pointage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --papier:#EEF2F4;
+    --encre:#141E28;
+    --encre-2:#5A6b78;
+    --trait:#D3DCE2;
+    --carte:#FFFFFF;
+    --actif:#1E6F63;
+    --actif-clair:#E4F0ED;
+    --alerte:#B4553C;
+    --r:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--papier);
+    color:var(--encre);
+    font-family:"Space Grotesk",system-ui,sans-serif;
+    font-size:16px;line-height:1.45;
+    padding:18px 16px calc(28px + env(safe-area-inset-bottom));
+    max-width:620px;margin:0 auto;
+  }
+  h1{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:0}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--encre-2)}
+  header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+  .carte{background:var(--carte);border:1px solid var(--trait);border-radius:var(--r);padding:16px;margin-bottom:14px}
+
+  /* --- pointeuse --- */
+  .pointeuse.encours{border-color:var(--actif);background:var(--actif-clair)}
+  .chrono{font-family:"IBM Plex Mono",monospace;font-size:44px;font-weight:500;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;margin:6px 0 2px}
+  .encours .chrono{color:var(--actif)}
+  .pouls{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--actif);margin-right:8px;vertical-align:middle;animation:pouls 2.4s ease-in-out infinite}
+  @keyframes pouls{0%,100%{opacity:1}50%{opacity:.25}}
+  .sous{color:var(--encre-2);font-size:14px;min-height:21px}
+  label{display:block;font-size:12px;font-family:"IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--encre-2);margin:14px 0 6px}
+  select,input[type=text],input[type=time],input[type=date]{
+    width:100%;padding:11px 12px;font:inherit;font-size:15px;color:var(--encre);
+    background:#fff;border:1px solid var(--trait);border-radius:10px;appearance:none
+  }
+  .btn{
+    display:block;width:100%;margin-top:16px;padding:15px;border:0;border-radius:11px;
+    font:inherit;font-size:16px;font-weight:700;letter-spacing:.02em;cursor:pointer;color:#fff;background:var(--actif)
+  }
+  .btn.stop{background:var(--alerte)}
+  .btn:active{transform:translateY(1px)}
+  .btn.mini{width:auto;margin:0;padding:9px 14px;font-size:13px;font-weight:500;background:transparent;color:var(--encre-2);border:1px solid var(--trait)}
+
+  /* --- onglets --- */
+  .onglets{display:flex;gap:6px;margin:20px 0 12px}
+  .onglets button{flex:1;padding:9px;border:1px solid var(--trait);background:transparent;border-radius:9px;font:inherit;font-size:14px;color:var(--encre-2);cursor:pointer}
+  .onglets button[aria-selected=true]{background:var(--encre);border-color:var(--encre);color:#fff}
+
+  /* --- signature : rubans par jour --- */
+  .jour{display:grid;grid-template-columns:52px 1fr 56px;align-items:center;gap:10px;padding:7px 0}
+  .jour + .jour{border-top:1px solid var(--trait)}
+  .jour .j{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--encre-2);text-transform:uppercase}
+  .jour .t{font-family:"IBM Plex Mono",monospace;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+  .ruban{display:flex;height:16px;border-radius:4px;overflow:hidden;background:#E7ECEF}
+  .ruban span{height:100%}
+  .aujourdhui .j{color:var(--encre);font-weight:600}
+
+  .total{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+  .total .gros{font-family:"IBM Plex Mono",monospace;font-size:32px;font-weight:600;font-variant-numeric:tabular-nums}
+  .ligne{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:15px}
+  .ligne + .ligne{border-top:1px solid var(--trait)}
+  .pastille{width:10px;height:10px;border-radius:3px;flex:none}
+  .ligne .droite{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:14px;font-variant-numeric:tabular-nums;color:var(--encre-2)}
+  .mission{color:var(--encre-2);font-size:13px}
+  .vide{color:var(--encre-2);font-size:14px;padding:6px 0}
+  .sup{background:none;border:0;color:var(--encre-2);font-size:18px;line-height:1;padding:4px 6px;cursor:pointer}
+  .rangee{display:flex;gap:8px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .demi{display:flex;gap:8px}.demi>div{flex:1}
+  dialog{border:1px solid var(--trait);border-radius:var(--r);padding:18px;max-width:340px;width:calc(100% - 32px);background:var(--carte)}
+  dialog::backdrop{background:rgba(20,30,40,.4)}
+  :focus-visible{outline:2px solid var(--actif);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){.pouls{animation:none}}
+</style>
+
+<header>
+  <h1>Pointage</h1>
+  <div class="eyebrow" id="dateJour"></div>
+</header>
+
+<section class="carte pointeuse" id="pointeuse">
+  <div class="eyebrow" id="etatLabel">Arrêté</div>
+  <div class="chrono" id="chrono">0:00:00</div>
+  <div class="sous" id="sous">Choisissez un site pour démarrer.</div>
+
+  <div id="champs">
+    <label for="site">Site</label>
+    <select id="site"></select>
+    <label for="mission">Mission <span style="text-transform:none;letter-spacing:0">(facultatif)</span></label>
+    <input type="text" id="mission" list="missions" placeholder="Visite d'équipe, entretien…">
+    <datalist id="missions"></datalist>
+  </div>
+
+  <button class="btn" id="bascule">Démarrer</button>
+  <div class="rangee">
+    <button class="btn mini" id="ajoutManuel">Ajouter à la main</button>
+    <button class="btn mini" id="gererSites">Sites</button>
+  </div>
+</section>
+
+<div class="onglets" role="tablist">
+  <button role="tab" data-vue="jour" aria-selected="true">Jour</button>
+  <button role="tab" data-vue="semaine" aria-selected="false">Semaine</button>
+  <button role="tab" data-vue="mois" aria-selected="false">Mois</button>
+</div>
+
+<section class="carte" id="vue"></section>
+
+<dialog id="dlgManuel">
+  <div class="eyebrow">Saisie manuelle</div>
+  <label for="mDate">Date</label><input type="date" id="mDate">
+  <div class="demi" style="margin-top:0">
+    <div><label for="mDebut">Début</label><input type="time" id="mDebut"></div>
+    <div><label for="mFin">Fin</label><input type="time" id="mFin"></div>
+  </div>
+  <label for="mSite">Site</label><select id="mSite"></select>
+  <label for="mMission">Mission</label><input type="text" id="mMission">
+  <button class="btn" id="mValider">Enregistrer</button>
+  <div class="rangee"><button class="btn mini" id="mAnnuler">Annuler</button></div>
+</dialog>
+
+<dialog id="dlgSites">
+  <div class="eyebrow">Sites</div>
+  <div id="listeSites"></div>
+  <label for="nouveauSite">Ajouter un site</label>
+  <input type="text" id="nouveauSite" placeholder="Nom du site">
+  <button class="btn" id="sAjouter">Ajouter</button>
+  <div class="rangee"><button class="btn mini" id="sFermer">Fermer</button></div>
+</dialog>
+
+<script>
+const COULEURS = ["#1E6F63","#2E5C8A","#B4553C","#7A5EA6","#C08A1E","#4A7A2E","#A34A6E","#4E6E8A"];
+const CLE = "pointage:v1";
+let mem = null;
+
+const aStorage = typeof window.storage !== "undefined";
+const store = {
+  async get(){
+    if(aStorage){
+      try{ const r = await window.storage.get(CLE); return r ? JSON.parse(r.value) : null; }catch(e){ return mem; }
+    }
+    try{ const v = localStorage.getItem(CLE); return v ? JSON.parse(v) : null; }catch(e){ return mem; }
+  },
+  async set(v){
+    mem = v;
+    if(aStorage){ try{ await window.storage.set(CLE, JSON.stringify(v)); }catch(e){} return; }
+    try{ localStorage.setItem(CLE, JSON.stringify(v)); }catch(e){}
+  }
+};
+
+let etat = { sites:["Brunet","Picot 1","Picot 2","St Jean","Cuers","Ollioules","Bureau","Déplacement"], entrees:[], encours:null };
+
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,"0");
+const hms = ms => { const s=Math.max(0,Math.floor(ms/1000)); return `${Math.floor(s/3600)}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`; };
+const hm  = ms => { const m=Math.round(ms/60000); return `${Math.floor(m/60)} h ${pad(m%60)}`; };
+const jourCle = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const couleur = site => COULEURS[etat.sites.indexOf(site) % COULEURS.length] || "#8895A0";
+const duree = e => new Date(e.fin) - new Date(e.debut);
+
+function lundi(d){ const x=new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; }
+
+async function sauver(){ await store.set(etat); }
+
+/* ---------- pointeuse ---------- */
+function majPointeuse(){
+  const on = !!etat.encours;
+  $("#pointeuse").classList.toggle("encours", on);
+  $("#champs").style.display = on ? "none" : "";
+  $("#bascule").textContent = on ? "Arrêter" : "Démarrer";
+  $("#bascule").classList.toggle("stop", on);
+  $("#etatLabel").innerHTML = on ? '<span class="pouls"></span>En cours' : "Arrêté";
+  if(on){
+    const e = etat.encours;
+    $("#chrono").textContent = hms(Date.now() - new Date(e.debut));
+    $("#sous").textContent = `${e.site}${e.mission ? " · " + e.mission : ""} — depuis ${new Date(e.debut).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}`;
+  }else{
+    $("#chrono").textContent = "0:00:00";
+    $("#sous").textContent = "Choisissez un site pour démarrer.";
+  }
+}
+
+$("#bascule").onclick = async () => {
+  if(etat.encours){
+    const e = etat.encours;
+    e.fin = new Date().toISOString();
+    if(duree(e) >= 60000) etat.entrees.push(e);
+    etat.encours = null;
+  }else{
+    etat.encours = { id:Date.now(), site:$("#site").value, mission:$("#mission").value.trim(), debut:new Date().toISOString() };
+    $("#mission").value = "";
+  }
+  await sauver(); majPointeuse(); rendre();
+};
+
+/* ---------- vues ---------- */
+let vue = "jour";
+document.querySelectorAll(".onglets button").forEach(b => b.onclick = () => {
+  vue = b.dataset.vue;
+  document.querySelectorAll(".onglets button").forEach(x => x.setAttribute("aria-selected", x===b));
+  rendre();
+});
+
+function totalParSite(list){
+  const m = {};
+  list.forEach(e => m[e.site] = (m[e.site]||0) + duree(e));
+  return Object.entries(m).sort((a,b) => b[1]-a[1]);
+}
+
+function rendre(){
+  const c = $("#vue");
+  const now = new Date();
+  if(vue === "jour"){
+    const k = jourCle(now);
+    const list = etat.entrees.filter(e => jourCle(new Date(e.debut)) === k)
+                             .sort((a,b) => new Date(a.debut)-new Date(b.debut));
+    const tot = list.reduce((s,e) => s+duree(e), 0);
+    c.innerHTML = `<div class="total"><div class="eyebrow">Aujourd'hui</div><div class="gros">${hm(tot)}</div></div>`
+      + (list.length ? list.map(e => `
+        <div class="ligne">
+          <span class="pastille" style="background:${couleur(e.site)}"></span>
+          <span>${e.site}${e.mission ? `<br><span class="mission">${e.mission}</span>` : ""}</span>
+          <span class="droite">${new Date(e.debut).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}–${new Date(e.fin).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})} · ${hm(duree(e))}</span>
+          <button class="sup" data-sup="${e.id}" aria-label="Supprimer">×</button>
+        </div>`).join("")
+        : `<div class="vide">Aucun pointage aujourd'hui.</div>`);
+  }
+
+  if(vue === "semaine"){
+    const l = lundi(now), fin = new Date(l); fin.setDate(fin.getDate()+7);
+    const list = etat.entrees.filter(e => { const d = new Date(e.debut); return d>=l && d<fin; });
+    const tot = list.reduce((s,e) => s+duree(e), 0);
+    const max = Math.max(8*3600000, ...[0,1,2,3,4,5,6].map(i => {
+      const k = jourCle(new Date(l.getFullYear(), l.getMonth(), l.getDate()+i));
+      return list.filter(e => jourCle(new Date(e.debut))===k).reduce((s,e)=>s+duree(e),0);
+    }));
+    let jours = "";
+    for(let i=0;i<7;i++){
+      const d = new Date(l.getFullYear(), l.getMonth(), l.getDate()+i);
+      const dj = list.filter(e => jourCle(new Date(e.debut)) === jourCle(d));
+      const t = dj.reduce((s,e)=>s+duree(e),0);
+      const bandes = totalParSite(dj).map(([s,ms]) =>
+        `<span style="background:${couleur(s)};width:${ms/max*100}%" title="${s}"></span>`).join("");
+      jours += `<div class="jour${jourCle(d)===jourCle(now)?" aujourdhui":""}">
+        <div class="j">${d.toLocaleDateString("fr-FR",{weekday:"short"})} ${d.getDate()}</div>
+        <div class="ruban">${bandes}</div>
+        <div class="t">${t ? hm(t) : "—"}</div></div>`;
+    }
+    c.innerHTML = `<div class="total"><div class="eyebrow">Semaine du ${l.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}</div><div class="gros">${hm(tot)}</div></div>${jours}
+      <div style="margin-top:14px">${totalParSite(list).map(([s,ms]) =>
+        `<div class="ligne"><span class="pastille" style="background:${couleur(s)}"></span>${s}<span class="droite">${hm(ms)}</span></div>`).join("") || '<div class="vide">Rien cette semaine.</div>'}</div>`;
+  }
+
+  if(vue === "mois"){
+    const list = etat.entrees.filter(e => { const d = new Date(e.debut); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); });
+    const tot = list.reduce((s,e)=>s+duree(e),0);
+    const parSite = totalParSite(list);
+    c.innerHTML = `<div class="total"><div class="eyebrow">${now.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</div><div class="gros">${hm(tot)}</div></div>`
+      + (parSite.length ? parSite.map(([s,ms]) => `
+        <div class="ligne"><span class="pastille" style="background:${couleur(s)}"></span>${s}
+        <span class="droite">${hm(ms)} · ${Math.round(ms/tot*100)} %</span></div>`).join("")
+        : '<div class="vide">Rien ce mois-ci.</div>');
+  }
+
+  c.querySelectorAll("[data-sup]").forEach(b => b.onclick = async () => {
+    etat.entrees = etat.entrees.filter(e => String(e.id) !== b.dataset.sup);
+    await sauver(); rendre();
+  });
+}
+
+/* ---------- sites & missions ---------- */
+function majSelects(){
+  const opts = etat.sites.map(s => `<option>${s}</option>`).join("");
+  $("#site").innerHTML = opts; $("#mSite").innerHTML = opts;
+  const ms = [...new Set(etat.entrees.map(e => e.mission).filter(Boolean))].slice(-12);
+  $("#missions").innerHTML = ms.map(m => `<option value="${m}">`).join("");
+}
+$("#gererSites").onclick = () => {
+  $("#listeSites").innerHTML = etat.sites.map(s =>
+    `<div class="ligne"><span class="pastille" style="background:${couleur(s)}"></span>${s}<button class="sup droite" data-site="${s}">×</button></div>`).join("");
+  $("#listeSites").querySelectorAll("[data-site]").forEach(b => b.onclick = async () => {
+    if(etat.sites.length > 1){ etat.sites = etat.sites.filter(s => s !== b.dataset.site); await sauver(); majSelects(); $("#gererSites").click(); rendre(); }
+  });
+  $("#dlgSites").showModal();
+};
+$("#sAjouter").onclick = async () => {
+  const v = $("#nouveauSite").value.trim();
+  if(v && !etat.sites.includes(v)){ etat.sites.push(v); $("#nouveauSite").value=""; await sauver(); majSelects(); $("#dlgSites").close(); $("#gererSites").click(); }
+};
+$("#sFermer").onclick = () => $("#dlgSites").close();
+
+/* ---------- saisie manuelle ---------- */
+$("#ajoutManuel").onclick = () => {
+  $("#mDate").value = jourCle(new Date());
+  $("#dlgManuel").showModal();
+};
+$("#mAnnuler").onclick = () => $("#dlgManuel").close();
+$("#mValider").onclick = async () => {
+  const d = $("#mDate").value, a = $("#mDebut").value, b = $("#mFin").value;
+  if(!d || !a || !b) return;
+  const debut = new Date(`${d}T${a}`), fin = new Date(`${d}T${b}`);
+  if(fin <= debut) return;
+  etat.entrees.push({ id:Date.now(), site:$("#mSite").value, mission:$("#mMission").value.trim(), debut:debut.toISOString(), fin:fin.toISOString() });
+  $("#mMission").value=""; $("#mDebut").value=""; $("#mFin").value="";
+  await sauver(); $("#dlgManuel").close(); rendre();
+};
+
+/* ---------- init ---------- */
+(async () => {
+  const sauve = await store.get();
+  if(sauve) etat = Object.assign(etat, sauve);
+  $("#dateJour").textContent = new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+  majSelects(); majPointeuse(); rendre();
+  setInterval(() => { if(etat.encours) majPointeuse(); }, 1000);
+})();
+</script>
